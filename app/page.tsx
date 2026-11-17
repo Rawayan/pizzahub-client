@@ -78,7 +78,7 @@ export default function HomePage() {
       </section>
 
       <footer className="border-t border-border bg-card px-6 py-6 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} PizzaHub. All rights reserved.
+         © 2026 PizzaHub. All rights reserved.
       </footer>
     </main>
   );
