@@ -1,5 +1,9 @@
+
 import type { Metadata } from "next";
 import "./globals.css";
+
+import Navbar from "@/src/components/layout/navbar";
+import Footer from "@/src/components/layout/footer";
 
 export const metadata: Metadata = {
   title: {
@@ -25,8 +29,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen antialiased">
-        {children}
+      <body className="flex min-h-screen flex-col antialiased">
+        <Navbar />
+
+        <div className="flex flex-1 flex-col">
+          {children}
+        </div>
+
+        <Footer />
       </body>
     </html>
   );

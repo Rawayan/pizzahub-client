@@ -1,39 +1,64 @@
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* -----------------------------------------
+   PizzaHub Design Tokens
+----------------------------------------- */
+
 :root {
-  --background: oklch(0.985 0.008 80);
-  --foreground: oklch(0.22 0.025 35);
+  color-scheme: light;
+
+  --background: oklch(0.985 0.012 83);
+  --foreground: oklch(0.23 0.025 35);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.025 35);
+  --card-foreground: oklch(0.23 0.025 35);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.025 35);
+  --popover-foreground: oklch(0.23 0.025 35);
 
-  --primary: oklch(0.55 0.19 29);
+  /* PizzaHub signature red */
+  --primary: oklch(0.55 0.205 29);
   --primary-foreground: oklch(0.99 0.005 80);
 
-  --secondary: oklch(0.91 0.07 72);
-  --secondary-foreground: oklch(0.28 0.04 40);
+  /* Warm cream */
+  --secondary: oklch(0.94 0.045 79);
+  --secondary-foreground: oklch(0.29 0.045 39);
 
-  --muted: oklch(0.95 0.015 75);
-  --muted-foreground: oklch(0.48 0.025 40);
+  /* Muted surfaces */
+  --muted: oklch(0.96 0.018 78);
+  --muted-foreground: oklch(0.51 0.025 42);
 
-  --accent: oklch(0.78 0.14 72);
-  --accent-foreground: oklch(0.25 0.04 35);
+  /* Golden orange accent */
+  --accent: oklch(0.82 0.15 73);
+  --accent-foreground: oklch(0.28 0.05 39);
 
   --destructive: oklch(0.58 0.23 28);
-  --border: oklch(0.89 0.018 65);
-  --input: oklch(0.89 0.018 65);
-  --ring: oklch(0.55 0.19 29);
 
-  --radius: 0.75rem;
+  --border: oklch(0.90 0.022 70);
+  --input: oklch(0.90 0.022 70);
+  --ring: oklch(0.62 0.17 40);
+
+  --radius: 0.8rem;
+
+  /* Additional PizzaHub tokens */
+  --pizza-red: oklch(0.55 0.205 29);
+  --pizza-orange: oklch(0.72 0.17 55);
+  --pizza-cream: oklch(0.985 0.012 83);
+  --pizza-dark: oklch(0.23 0.025 35);
 }
 
+/* -----------------------------------------
+   Dark theme tokens
+   Theme switching is implemented later.
+----------------------------------------- */
+
 .dark {
+  color-scheme: dark;
+
   --background: oklch(0.17 0.015 35);
   --foreground: oklch(0.96 0.01 75);
 
@@ -56,10 +81,20 @@
   --accent-foreground: oklch(0.96 0.01 75);
 
   --destructive: oklch(0.65 0.2 28);
+
   --border: oklch(0.32 0.02 40);
   --input: oklch(0.32 0.02 40);
   --ring: oklch(0.68 0.18 32);
+
+  --pizza-red: oklch(0.68 0.18 32);
+  --pizza-orange: oklch(0.75 0.15 60);
+  --pizza-cream: oklch(0.21 0.018 35);
+  --pizza-dark: oklch(0.96 0.01 75);
 }
+
+/* -----------------------------------------
+   Tailwind CSS Theme Mapping
+----------------------------------------- */
 
 @theme inline {
   --color-background: var(--background);
@@ -88,11 +123,17 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --font-sans: Arial, Helvetica, sans-serif;
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
+
+/* -----------------------------------------
+   Base Styles
+----------------------------------------- */
 
 * {
   box-sizing: border-box;
@@ -100,21 +141,84 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 body {
+  min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button,
-a {
+a,
+input,
+select,
+textarea {
   -webkit-tap-highlight-color: transparent;
 }
 
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+}
+
 ::selection {
-  background: oklch(0.75 0.13 42);
+  background: oklch(0.78 0.14 55);
   color: oklch(0.2 0.03 35);
+}
+
+/* Accessible keyboard focus */
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+/* Consistent form controls */
+
+input,
+select,
+textarea {
+  color: var(--foreground);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+/* Smooth interaction defaults */
+
+a,
+button {
+  transition-duration: 180ms;
+}
+
+/* Reduced motion accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
