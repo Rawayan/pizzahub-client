@@ -1,10 +1,14 @@
 
-import { setServers } from "node:dns";
+import { setServers, promises as dnsPromises } from "node:dns";
 import { MongoClient } from "mongodb";
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { createAuthMiddleware, APIError } from "better-auth/api";
 import { jwt } from "better-auth/plugins";
+
+// ============================================
+// Environment Configuration
+// ============================================
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.DB_NAME || "pizzahub";
@@ -20,12 +24,40 @@ if (!BETTER_AUTH_SECRET || BETTER_AUTH_SECRET.length < 32) {
   throw new Error("BETTER_AUTH_SECRET must be at least 32 characters");
 }
 
-const DNS_SERVERS = (process.env.DNS_SERVERS || "192.168.0.1")
+// ============================================
+// MongoDB DNS Configuration
+// ============================================
+
+const DNS_SERVERS = (
+  process.env.DNS_SERVERS || "8.8.8.8,1.1.1.1"
+)
   .split(",")
   .map((server) => server.trim())
   .filter(Boolean);
 
 setServers(DNS_SERVERS);
+
+console.log("[PizzaHub DNS] Configured servers:", DNS_SERVERS);
+
+// Temporary DNS diagnostic for Next.js runtime
+dnsPromises
+  .resolveSrv("_mongodb._tcp.cluster0.ftcilyy.mongodb.net")
+  .then((records) => {
+    console.log(
+      "[PizzaHub DNS] SRV resolution successful:",
+      records
+    );
+  })
+  .catch((error) => {
+    console.error(
+      "[PizzaHub DNS] SRV resolution failed:",
+      error
+    );
+  });
+
+// ============================================
+// MongoDB Client
+// ============================================
 
 const globalForMongo = globalThis as typeof globalThis & {
   pizzaHubMongoClient?: MongoClient;
@@ -41,6 +73,10 @@ if (process.env.NODE_ENV !== "production") {
 
 const database = mongoClient.db(DB_NAME);
 
+// ============================================
+// Google OAuth Configuration
+// ============================================
+
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
@@ -54,6 +90,10 @@ const socialProviders =
         },
       }
     : {};
+
+// ============================================
+// Better Auth Configuration
+// ============================================
 
 export const auth = betterAuth({
   appName: "PizzaHub",
@@ -76,6 +116,10 @@ export const auth = betterAuth({
 
   socialProviders,
 
+  // ==========================================
+  // User Configuration
+  // ==========================================
+
   user: {
     modelName: "users",
 
@@ -86,23 +130,27 @@ export const auth = betterAuth({
         defaultValue: "customer",
         input: true,
       },
+
       isBlocked: {
         type: "boolean",
         required: false,
         defaultValue: false,
         input: false,
       },
+
       businessName: {
         type: "string",
         required: false,
         input: false,
       },
+
       subscriptionPlan: {
         type: "string",
         required: false,
         defaultValue: "free",
         input: false,
       },
+
       subscriptionExpiresAt: {
         type: "date",
         required: false,
@@ -110,6 +158,10 @@ export const auth = betterAuth({
       },
     },
   },
+
+  // ==========================================
+  // Database Hooks
+  // ==========================================
 
   databaseHooks: {
     user: {
@@ -139,6 +191,10 @@ export const auth = betterAuth({
       },
     },
   },
+
+  // ==========================================
+  // Registration Validation
+  // ==========================================
 
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
@@ -173,6 +229,10 @@ export const auth = betterAuth({
     }),
   },
 
+  // ==========================================
+  // JWT Plugin
+  // ==========================================
+
   plugins: [
     jwt({
       jwt: {
@@ -190,9 +250,14 @@ export const auth = betterAuth({
     }),
   ],
 
+  // ==========================================
+  // Session Configuration
+  // ==========================================
+
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
+
     cookieCache: {
       enabled: true,
       maxAge: 5 * 60,
