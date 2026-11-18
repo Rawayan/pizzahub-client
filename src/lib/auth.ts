@@ -4,6 +4,7 @@ import { MongoClient } from "mongodb";
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { createAuthMiddleware, APIError } from "better-auth/api";
+import { jwt } from "better-auth/plugins";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.DB_NAME || "pizzahub";
@@ -19,8 +20,6 @@ if (!BETTER_AUTH_SECRET || BETTER_AUTH_SECRET.length < 32) {
   throw new Error("BETTER_AUTH_SECRET must be at least 32 characters");
 }
 
-// The same DNS workaround verified during STEP 05.
-// This is important because Better Auth runs in the Next.js Node.js process.
 const DNS_SERVERS = (process.env.DNS_SERVERS || "192.168.0.1")
   .split(",")
   .map((server) => server.trim())
@@ -62,9 +61,7 @@ export const auth = betterAuth({
   baseURL: BETTER_AUTH_URL,
   secret: BETTER_AUTH_SECRET,
 
-  trustedOrigins: [
-    BETTER_AUTH_URL,
-  ],
+  trustedOrigins: [BETTER_AUTH_URL],
 
   database: mongodbAdapter(database, {
     client: mongoClient,
@@ -80,7 +77,6 @@ export const auth = betterAuth({
   socialProviders,
 
   user: {
-    // Assignment requires the Better Auth user collection to be named users.
     modelName: "users",
 
     additionalFields: {
@@ -90,27 +86,23 @@ export const auth = betterAuth({
         defaultValue: "customer",
         input: true,
       },
-
       isBlocked: {
         type: "boolean",
         required: false,
         defaultValue: false,
         input: false,
       },
-
       businessName: {
         type: "string",
         required: false,
         input: false,
       },
-
       subscriptionPlan: {
         type: "string",
         required: false,
         defaultValue: "free",
         input: false,
       },
-
       subscriptionExpiresAt: {
         type: "date",
         required: false,
@@ -123,8 +115,6 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          // Public registration can create customers or vendors only.
-          // Admin must never be assignable through public registration.
           const role = user.role === "vendor" ? "vendor" : "customer";
 
           return {
@@ -140,7 +130,6 @@ export const auth = betterAuth({
 
       update: {
         before: async (userData) => {
-          // Users cannot promote themselves or change their own role.
           if ("role" in userData) {
             return false;
           }
@@ -183,6 +172,23 @@ export const auth = betterAuth({
       }
     }),
   },
+
+  plugins: [
+    jwt({
+      jwt: {
+        issuer: BETTER_AUTH_URL,
+        audience: BETTER_AUTH_URL,
+        expirationTime: "15m",
+
+        definePayload: ({ user }) => ({
+          id: user.id,
+          email: user.email,
+          role: user.role || "customer",
+          isBlocked: Boolean(user.isBlocked),
+        }),
+      },
+    }),
+  ],
 
   session: {
     expiresIn: 60 * 60 * 24 * 7,
