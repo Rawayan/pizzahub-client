@@ -6,6 +6,22 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/src/lib/auth-client";
 
+const getSafeCallbackURL = (): string => {
+  const requestedURL = new URLSearchParams(
+    window.location.search
+  ).get("callbackURL");
+
+  if (
+    requestedURL &&
+    requestedURL.startsWith("/") &&
+    !requestedURL.startsWith("//")
+  ) {
+    return requestedURL;
+  }
+
+  return "/";
+};
+
 export default function LoginForm() {
   const router = useRouter();
 
@@ -15,26 +31,33 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
     setError("");
+
+    const callbackURL = getSafeCallbackURL();
 
     try {
       setLoading(true);
 
-      const { error: authError } = await authClient.signIn.email({
-        email: email.trim().toLowerCase(),
-        password,
-        rememberMe: true,
-        callbackURL: "/",
-      });
+      const { error: authError } =
+        await authClient.signIn.email({
+          email: email.trim().toLowerCase(),
+          password,
+          rememberMe: true,
+          callbackURL,
+        });
 
       if (authError) {
-        setError(authError.message || "Invalid email or password.");
+        setError(
+          authError.message || "Invalid email or password."
+        );
         return;
       }
 
-      router.push("/");
+      router.push(callbackURL);
       router.refresh();
     } catch (err) {
       console.error("Login error:", err);
@@ -50,18 +73,23 @@ export default function LoginForm() {
     try {
       setGoogleLoading(true);
 
-      const { error: authError } = await authClient.signIn.social({
-        provider: "google",
-        callbackURL: "/",
-      });
+      const { error: authError } =
+        await authClient.signIn.social({
+          provider: "google",
+          callbackURL: getSafeCallbackURL(),
+        });
 
       if (authError) {
-        setError(authError.message || "Google sign-in failed.");
+        setError(
+          authError.message || "Google sign-in failed."
+        );
         setGoogleLoading(false);
       }
     } catch (err) {
       console.error("Google login error:", err);
-      setError("Unable to sign in with Google. Please try again.");
+      setError(
+        "Unable to sign in with Google. Please try again."
+      );
       setGoogleLoading(false);
     }
   };
@@ -72,6 +100,7 @@ export default function LoginForm() {
         <h1 className="text-3xl font-bold text-gray-900">
           Welcome back
         </h1>
+
         <p className="mt-2 text-sm text-gray-500">
           Sign in to continue to PizzaHub.
         </p>
@@ -88,9 +117,13 @@ export default function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="login-email" className="mb-1 block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="login-email"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
             Email address
           </label>
+
           <input
             id="login-email"
             type="email"
@@ -104,9 +137,13 @@ export default function LoginForm() {
         </div>
 
         <div>
-          <label htmlFor="login-password" className="mb-1 block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="login-password"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
             Password
           </label>
+
           <input
             id="login-password"
             type="password"
@@ -121,7 +158,7 @@ export default function LoginForm() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || googleLoading}
           className="w-full rounded-lg bg-orange-600 px-4 py-3 font-semibold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Signing in..." : "Sign in"}
@@ -137,11 +174,13 @@ export default function LoginForm() {
       <button
         type="button"
         onClick={handleGoogleLogin}
-        disabled={googleLoading}
+        disabled={googleLoading || loading}
         className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 px-4 py-3 font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
       >
-        <span className="font-bold text-lg">G</span>
-        {googleLoading ? "Connecting to Google..." : "Continue with Google"}
+        <span className="text-lg font-bold">G</span>
+        {googleLoading
+          ? "Connecting to Google..."
+          : "Continue with Google"}
       </button>
 
       <div className="mt-6 text-center text-sm text-gray-600">
