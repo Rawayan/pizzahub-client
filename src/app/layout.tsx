@@ -1,18 +1,23 @@
-
 import type { Metadata } from "next";
+
 import "./globals.css";
 
 import Navbar from "@/src/components/layout/navbar";
 import Footer from "@/src/components/layout/footer";
+
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: {
     default: "PizzaHub | Fresh Pizza Delivered",
     template: "%s | PizzaHub",
   },
+
   description:
     "Discover delicious pizzas, explore local restaurants, and enjoy fresh pizza delivered to your door with PizzaHub.",
+
   applicationName: "PizzaHub",
+
   keywords: [
     "PizzaHub",
     "Pizza Ordering",
@@ -37,6 +42,12 @@ export default function RootLayout({
         </div>
 
         <Footer />
+
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+        />
       </body>
     </html>
   );
