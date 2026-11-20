@@ -1,9 +1,11 @@
+
 import type { Metadata } from "next";
 
 import "./globals.css";
 
 import Navbar from "@/src/components/layout/navbar";
 import Footer from "@/src/components/layout/footer";
+import ThemeProvider from "@/src/components/providers/theme-provider";
 
 import { Toaster } from "sonner";
 
@@ -35,19 +37,22 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="flex min-h-screen flex-col antialiased">
-        <Navbar />
+        <ThemeProvider>
+          <Navbar />
 
-        <div className="flex flex-1 flex-col">
-          {children}
-        </div>
+          <div className="flex flex-1 flex-col">
+            {children}
+          </div>
 
-        <Footer />
+          <Footer />
 
-        <Toaster
-          position="top-right"
-          richColors
-          closeButton
-        />
+          <Toaster
+            position="top-right"
+            richColors
+            closeButton
+            theme="system"
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

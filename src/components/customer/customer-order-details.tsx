@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 
 import { apiFetch } from "@/src/lib/api-client";
+import OrderStatusTimeline from "@/src/components/customer/order-status-timeline";
 
 type OrderStatus =
   | "pending"
@@ -84,25 +85,29 @@ const statusInfo: Record<
     label: "Pending",
     description:
       "Your request is waiting for the restaurant to respond.",
-    className: "bg-amber-100 text-amber-800",
+    className:
+      "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300",
     icon: Clock3,
   },
   accepted: {
     label: "Accepted",
     description: "The restaurant has accepted your order.",
-    className: "bg-green-100 text-green-800",
+    className:
+      "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300",
     icon: CheckCircle2,
   },
   rejected: {
     label: "Rejected",
     description: "The restaurant was unable to accept this order.",
-    className: "bg-red-100 text-red-800",
+    className:
+      "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
     icon: XCircle,
   },
   cancelled: {
     label: "Cancelled",
     description: "This order has been cancelled.",
-    className: "bg-gray-100 text-gray-700",
+    className:
+      "bg-muted text-muted-foreground",
     icon: XCircle,
   },
 };
@@ -194,9 +199,7 @@ export default function CustomerOrderDetails({
     return (
       <div className="mx-auto max-w-4xl space-y-5">
         <div className="h-8 w-48 animate-pulse rounded bg-muted" />
-
         <div className="h-48 animate-pulse rounded-2xl bg-muted" />
-
         <div className="h-64 animate-pulse rounded-2xl bg-muted" />
       </div>
     );
@@ -206,7 +209,7 @@ export default function CustomerOrderDetails({
   if (error || !order) {
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card px-6 py-16 text-center">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+        <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300">
           <Package className="size-7" />
         </div>
 
@@ -279,7 +282,7 @@ export default function CustomerOrderDetails({
       {/* Pizza information */}
       <section className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
         <div className="flex flex-col gap-5 sm:flex-row">
-          <div className="flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-orange-50 sm:size-44">
+          <div className="flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-orange-50 dark:bg-orange-950/30 sm:size-44">
             {order.item?.images?.[0] ? (
               <img
                 src={order.item.images[0]}
@@ -314,24 +317,11 @@ export default function CustomerOrderDetails({
         </div>
       </section>
 
-      {/* Current status */}
-      <section className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <StatusIcon className="size-5" />
-          </div>
-
-          <div>
-            <h2 className="font-extrabold">
-              Current order status
-            </h2>
-
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              {currentStatus.description}
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Order status timeline */}
+      <OrderStatusTimeline
+        status={order.status}
+        createdAt={order.createdAt}
+      />
 
       {/* Delivery and restaurant information */}
       <section className="grid gap-5 md:grid-cols-2">
@@ -363,6 +353,7 @@ export default function CustomerOrderDetails({
 
               <p className="mt-1 flex items-start gap-2 text-sm font-semibold leading-6">
                 <MapPin className="mt-1 size-4 shrink-0 text-primary" />
+
                 <span className="break-words">
                   {order.deliveryAddress}
                 </span>
@@ -392,7 +383,7 @@ export default function CustomerOrderDetails({
           </div>
 
           <div className="mt-5 flex items-center gap-3">
-            <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-orange-50 text-primary">
+            <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-orange-50 text-primary dark:bg-orange-950/30">
               {order.vendor?.image ? (
                 <img
                   src={order.vendor.image}
@@ -431,12 +422,12 @@ export default function CustomerOrderDetails({
 
       {/* Pending order cancellation */}
       {order.status === "pending" && (
-        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-          <h2 className="font-extrabold text-amber-950">
+        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-800 dark:bg-amber-950/30">
+          <h2 className="font-extrabold text-amber-950 dark:text-amber-200">
             Need to cancel this order?
           </h2>
 
-          <p className="mt-1 text-sm leading-6 text-amber-900/80">
+          <p className="mt-1 text-sm leading-6 text-amber-900/80 dark:text-amber-200/80">
             You can cancel this request while it is still pending.
             Once the restaurant accepts or rejects it, cancellation
             through this page will no longer be available.
@@ -448,7 +439,7 @@ export default function CustomerOrderDetails({
                 type="button"
                 onClick={() => setConfirmCancel(false)}
                 disabled={cancelling}
-                className="rounded-xl border border-amber-300 px-4 py-2.5 text-sm font-bold text-amber-950 disabled:opacity-60"
+                className="rounded-xl border border-amber-300 px-4 py-2.5 text-sm font-bold text-amber-950 disabled:opacity-60 dark:border-amber-700 dark:text-amber-200"
               >
                 Keep order
               </button>

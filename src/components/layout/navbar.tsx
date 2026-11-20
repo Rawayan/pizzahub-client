@@ -7,11 +7,12 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Menu,
   Pizza,
-  X,
   UserRound,
+  X,
 } from "lucide-react";
 
 import { useSession, authClient } from "@/src/lib/auth-client";
+import ThemeToggle from "@/src/components/layout/theme-toggle";
 
 const navigationLinks = [
   { label: "Home", href: "/" },
@@ -29,6 +30,10 @@ export default function Navbar() {
 
   const isAuthenticated = Boolean(session?.user);
 
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
@@ -40,8 +45,7 @@ export default function Navbar() {
         return;
       }
 
-      setMobileMenuOpen(false);
-
+      closeMobileMenu();
       router.push("/login");
       router.refresh();
     } catch (error) {
@@ -51,22 +55,14 @@ export default function Navbar() {
     }
   };
 
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
-
-  const isActive = (href: string) => {
-    return (
-      pathname === href ||
-      (href !== "/" && pathname.startsWith(href))
-    );
-  };
+  const isLinkActive = (href: string) =>
+    pathname === href ||
+    (href !== "/" && pathname.startsWith(href));
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-card/95 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-8">
         {/* Brand */}
-
         <Link
           href="/"
           onClick={closeMobileMenu}
@@ -82,35 +78,30 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
-
+        {/* Desktop navigation */}
         <nav
           className="hidden items-center gap-8 md:flex"
           aria-label="Main navigation"
         >
-          {navigationLinks.map((link) => {
-            const active = isActive(link.href);
-
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={active ? "page" : undefined}
-                className={`text-sm font-semibold transition-colors ${
-                  active
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-primary"
-                }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+          {navigationLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`text-sm font-semibold transition-colors ${
+                isLinkActive(link.href)
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-primary"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* Desktop Authentication Actions */}
-
+        {/* Desktop actions */}
         <div className="hidden items-center gap-3 md:flex">
+          <ThemeToggle />
+
           {isPending ? (
             <div
               className="h-9 w-28 animate-pulse rounded-lg bg-muted"
@@ -124,14 +115,13 @@ export default function Navbar() {
 
               <Link
                 href="/profile"
-                className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition ${
-                  isActive("/profile")
-                    ? "border-primary bg-primary/10 text-primary"
+                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                  isLinkActive("/profile")
+                    ? "border-primary text-primary"
                     : "border-border text-foreground hover:border-primary hover:text-primary"
                 }`}
               >
                 <UserRound className="size-4" />
-
                 Profile Settings
               </Link>
 
@@ -163,28 +153,32 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile actions */}
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
 
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen((previous) => !previous)}
-          className="flex size-10 items-center justify-center rounded-lg border border-border text-foreground transition hover:bg-muted md:hidden"
-          aria-label={
-            mobileMenuOpen ? "Close menu" : "Open menu"
-          }
-          aria-expanded={mobileMenuOpen}
-          aria-controls="mobile-navigation"
-        >
-          {mobileMenuOpen ? (
-            <X className="size-5" />
-          ) : (
-            <Menu className="size-5" />
-          )}
-        </button>
+          <button
+            type="button"
+            onClick={() =>
+              setMobileMenuOpen((previous) => !previous)
+            }
+            className="flex size-10 items-center justify-center rounded-lg border border-border text-foreground transition hover:bg-muted"
+            aria-label={
+              mobileMenuOpen ? "Close menu" : "Open menu"
+            }
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
+          >
+            {mobileMenuOpen ? (
+              <X className="size-5" />
+            ) : (
+              <Menu className="size-5" />
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Navigation */}
-
+      {/* Mobile navigation */}
       {mobileMenuOpen && (
         <div
           id="mobile-navigation"
@@ -194,31 +188,22 @@ export default function Navbar() {
             className="flex flex-col gap-1"
             aria-label="Mobile navigation"
           >
-            {/* Public Navigation Links */}
-
-            {navigationLinks.map((link) => {
-              const active = isActive(link.href);
-
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={closeMobileMenu}
-                  aria-current={active ? "page" : undefined}
-                  className={`rounded-lg px-4 py-3 text-sm font-semibold transition ${
-                    active
-                      ? "bg-secondary text-primary"
-                      : "text-foreground hover:bg-muted"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
+            {navigationLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={closeMobileMenu}
+                className={`rounded-lg px-4 py-3 text-sm font-semibold transition ${
+                  isLinkActive(link.href)
+                    ? "bg-secondary text-primary"
+                    : "text-foreground hover:bg-muted"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
 
             <div className="my-2 border-t border-border" />
-
-            {/* Authentication Links */}
 
             {isPending ? (
               <div className="h-10 animate-pulse rounded-lg bg-muted" />
@@ -231,14 +216,13 @@ export default function Navbar() {
                 <Link
                   href="/profile"
                   onClick={closeMobileMenu}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition ${
-                    isActive("/profile")
+                  className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition ${
+                    isLinkActive("/profile")
                       ? "bg-secondary text-primary"
                       : "text-foreground hover:bg-muted"
                   }`}
                 >
-                  <UserRound className="size-5" />
-
+                  <UserRound className="size-4" />
                   Profile Settings
                 </Link>
 
@@ -246,7 +230,7 @@ export default function Navbar() {
                   type="button"
                   onClick={handleLogout}
                   disabled={loggingOut}
-                  className="w-full rounded-lg border border-border px-4 py-3 text-left text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-lg border border-border px-4 py-3 text-left text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary disabled:opacity-60"
                 >
                   {loggingOut ? "Signing out..." : "Sign out"}
                 </button>
