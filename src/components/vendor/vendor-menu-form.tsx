@@ -4,11 +4,11 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ImagePlus, Loader2, Upload, X } from "lucide-react";
-
-import { apiFetch } from "@/src/lib/api-client";
-
 import { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
+import { toast } from "sonner";
+
+import { apiFetch } from "@/src/lib/api-client";
 
 interface VendorMenuFormProps {
   itemId?: string;
@@ -60,7 +60,9 @@ export default function VendorMenuForm({
         const result = await response.json();
 
         if (!response.ok || !result.success) {
-          throw new Error(result.message || "Unable to load menu item.");
+          throw new Error(
+            result.message || "Unable to load menu item."
+          );
         }
 
         if (cancelled) return;
@@ -77,9 +79,13 @@ export default function VendorMenuForm({
         });
       } catch (err) {
         if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : "Unable to load item."
-          );
+          const message =
+            err instanceof Error
+              ? err.message
+              : "Unable to load item.";
+
+          setError(message);
+          toast.error(message);
         }
       } finally {
         if (!cancelled) setLoadingItem(false);
@@ -118,13 +124,19 @@ export default function VendorMenuForm({
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      setError("Please choose a JPG, PNG, or WEBP image.");
+      const message = "Please choose a JPG, PNG, or WEBP image.";
+
+      setError(message);
+      toast.error(message);
       event.target.value = "";
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError("Image size must be 5 MB or smaller.");
+      const message = "Image size must be 5 MB or smaller.";
+
+      setError(message);
+      toast.error(message);
       event.target.value = "";
       return;
     }
@@ -134,7 +146,9 @@ export default function VendorMenuForm({
     setPreviewUrl(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
     setError("");
 
@@ -146,12 +160,19 @@ export default function VendorMenuForm({
       !form.price ||
       Number(form.price) <= 0
     ) {
-      setError("Please complete all required fields with valid values.");
+      const message =
+        "Please complete all required fields with valid values.";
+
+      setError(message);
+      toast.error(message);
       return;
     }
 
     if (!selectedFile && form.images.length === 0) {
-      setError("Please upload a menu item image.");
+      const message = "Please upload a menu item image.";
+
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -205,19 +226,28 @@ export default function VendorMenuForm({
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || "Unable to save menu item.");
+        throw new Error(
+          result.message || "Unable to save menu item."
+        );
       }
 
-      window.alert(result.message);
+      toast.success(
+        result.message ||
+          (itemId
+            ? "Menu item updated successfully."
+            : "Menu item submitted successfully.")
+      );
 
       router.push("/vendor/menu");
       router.refresh();
     } catch (err) {
-      setError(
+      const message =
         err instanceof Error
           ? err.message
-          : "Something went wrong while saving."
-      );
+          : "Something went wrong while saving.";
+
+      setError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -225,8 +255,13 @@ export default function VendorMenuForm({
 
   if (loadingItem) {
     return (
-      <div className="flex min-h-72 items-center justify-center">
+      <div
+        className="flex min-h-72 items-center justify-center"
+        role="status"
+        aria-live="polite"
+      >
         <Loader2 className="size-8 animate-spin text-primary" />
+        <span className="sr-only">Loading menu item...</span>
       </div>
     );
   }
@@ -255,7 +290,10 @@ export default function VendorMenuForm({
         className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7"
       >
         {error && (
-          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          <div
+            className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
+            role="alert"
+          >
             {error}
           </div>
         )}
@@ -409,6 +447,7 @@ export default function VendorMenuForm({
 
         <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
           <p className="font-bold">Admin approval required</p>
+
           <p className="mt-1">
             New items and edited items are submitted as pending until an
             admin reviews them. They will not be visible to customers

@@ -10,6 +10,7 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { apiFetch } from "@/src/lib/api-client";
 
@@ -52,9 +53,10 @@ export default function VendorMenuManager() {
 
       setItems(result.data.items as VendorMenuItem[]);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Something went wrong."
-      );
+      const message =
+        err instanceof Error ? err.message : "Something went wrong.";
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -81,12 +83,20 @@ export default function VendorMenuManager() {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || "Unable to update availability.");
+        throw new Error(
+          result.message || "Unable to update availability."
+        );
       }
 
       await loadItems();
+
+      toast.success(
+        item.status === "approved"
+          ? "Menu item deactivated."
+          : "Menu item activated."
+      );
     } catch (err) {
-      window.alert(
+      toast.error(
         err instanceof Error ? err.message : "Update failed."
       );
     } finally {
@@ -118,8 +128,10 @@ export default function VendorMenuManager() {
       }
 
       await loadItems();
+
+      toast.success("Menu item deleted successfully.");
     } catch (err) {
-      window.alert(
+      toast.error(
         err instanceof Error ? err.message : "Delete failed."
       );
     } finally {
@@ -129,8 +141,13 @@ export default function VendorMenuManager() {
 
   if (loading) {
     return (
-      <div className="flex min-h-72 items-center justify-center">
+      <div
+        className="flex min-h-72 items-center justify-center"
+        role="status"
+        aria-live="polite"
+      >
         <Loader2 className="size-8 animate-spin text-primary" />
+        <span className="sr-only">Loading your menu items...</span>
       </div>
     );
   }
@@ -142,6 +159,7 @@ export default function VendorMenuManager() {
           <h1 className="text-3xl font-extrabold text-foreground">
             My Menu Items
           </h1>
+
           <p className="mt-2 text-sm text-muted-foreground">
             Manage your restaurant's menu and availability.
           </p>
@@ -149,6 +167,7 @@ export default function VendorMenuManager() {
 
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => void loadItems()}
             className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted"
           >
@@ -167,12 +186,23 @@ export default function VendorMenuManager() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-destructive/30 bg-card p-4 text-sm text-destructive">
-          {error}
+        <div
+          className="rounded-xl border border-destructive/30 bg-card p-4 text-sm text-destructive"
+          role="alert"
+        >
+          <p>{error}</p>
+
+          <button
+            type="button"
+            onClick={() => void loadItems()}
+            className="mt-3 font-bold underline underline-offset-4"
+          >
+            Try again
+          </button>
         </div>
       )}
 
-      {items.length === 0 ? (
+      {!error && items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-16 text-center">
           <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Plus className="size-7" />
@@ -193,7 +223,7 @@ export default function VendorMenuManager() {
             Add Your First Item
           </Link>
         </div>
-      ) : (
+      ) : !error ? (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((item) => (
             <article
@@ -223,6 +253,7 @@ export default function VendorMenuManager() {
                     <h2 className="truncate text-lg font-bold text-foreground">
                       {item.itemName}
                     </h2>
+
                     <p className="text-sm text-muted-foreground">
                       {item.category}
                     </p>
@@ -259,6 +290,7 @@ export default function VendorMenuManager() {
                   </Link>
 
                   <button
+                    type="button"
                     onClick={() => void deleteItem(item)}
                     disabled={actionId === item.id}
                     className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50"
@@ -275,6 +307,7 @@ export default function VendorMenuManager() {
                 {(item.status === "approved" ||
                   item.status === "inactive") && (
                   <button
+                    type="button"
                     onClick={() => void changeAvailability(item)}
                     disabled={actionId === item.id}
                     className="w-full rounded-lg bg-secondary px-3 py-2.5 text-sm font-bold text-secondary-foreground transition hover:opacity-80 disabled:opacity-50"
@@ -299,7 +332,7 @@ export default function VendorMenuManager() {
             </article>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
