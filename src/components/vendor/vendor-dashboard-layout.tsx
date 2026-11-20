@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   ArrowLeft,
   ClipboardList,
+  Crown,
   LayoutDashboard,
   PlusCircle,
   Pizza,
@@ -19,10 +20,10 @@ interface VendorDashboardLayoutProps {
 
 const navigationItems = [
   {
-    label: "Overview",
-    href: "/vendor/dashboard",
-    icon: LayoutDashboard,
-  },
+  label: "Subscription",
+  href: "/vendor/subscription",
+  icon: Crown,
+},
   {
     label: "My Menu Items",
     href: "/vendor/menu",
