@@ -4,7 +4,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, Pizza, X } from "lucide-react";
+import {
+  Menu,
+  Pizza,
+  X,
+  UserRound,
+} from "lucide-react";
+
 import { useSession, authClient } from "@/src/lib/auth-client";
 
 const navigationLinks = [
@@ -15,6 +21,7 @@ const navigationLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+
   const { data: session, isPending } = useSession();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -34,6 +41,7 @@ export default function Navbar() {
       }
 
       setMobileMenuOpen(false);
+
       router.push("/login");
       router.refresh();
     } catch (error) {
@@ -47,10 +55,18 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   };
 
+  const isActive = (href: string) => {
+    return (
+      pathname === href ||
+      (href !== "/" && pathname.startsWith(href))
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-card/95 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-8">
         {/* Brand */}
+
         <Link
           href="/"
           onClick={closeMobileMenu}
@@ -66,22 +82,22 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop navigation */}
+        {/* Desktop Navigation */}
+
         <nav
           className="hidden items-center gap-8 md:flex"
           aria-label="Main navigation"
         >
           {navigationLinks.map((link) => {
-            const isActive =
-              pathname === link.href ||
-              (link.href !== "/" && pathname.startsWith(link.href));
+            const active = isActive(link.href);
 
             return (
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={active ? "page" : undefined}
                 className={`text-sm font-semibold transition-colors ${
-                  isActive
+                  active
                     ? "text-primary"
                     : "text-muted-foreground hover:text-primary"
                 }`}
@@ -92,7 +108,8 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Desktop authentication actions */}
+        {/* Desktop Authentication Actions */}
+
         <div className="hidden items-center gap-3 md:flex">
           {isPending ? (
             <div
@@ -104,6 +121,19 @@ export default function Navbar() {
               <span className="max-w-40 truncate text-sm font-medium text-muted-foreground">
                 {session?.user.name || session?.user.email}
               </span>
+
+              <Link
+                href="/profile"
+                className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition ${
+                  isActive("/profile")
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-foreground hover:border-primary hover:text-primary"
+                }`}
+              >
+                <UserRound className="size-4" />
+
+                Profile Settings
+              </Link>
 
               <button
                 type="button"
@@ -133,12 +163,15 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile menu button */}
+        {/* Mobile Menu Button */}
+
         <button
           type="button"
           onClick={() => setMobileMenuOpen((previous) => !previous)}
           className="flex size-10 items-center justify-center rounded-lg border border-border text-foreground transition hover:bg-muted md:hidden"
-          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-label={
+            mobileMenuOpen ? "Close menu" : "Open menu"
+          }
           aria-expanded={mobileMenuOpen}
           aria-controls="mobile-navigation"
         >
@@ -150,7 +183,8 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile navigation */}
+      {/* Mobile Navigation */}
+
       {mobileMenuOpen && (
         <div
           id="mobile-navigation"
@@ -160,18 +194,19 @@ export default function Navbar() {
             className="flex flex-col gap-1"
             aria-label="Mobile navigation"
           >
+            {/* Public Navigation Links */}
+
             {navigationLinks.map((link) => {
-              const isActive =
-                pathname === link.href ||
-                (link.href !== "/" && pathname.startsWith(link.href));
+              const active = isActive(link.href);
 
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={closeMobileMenu}
+                  aria-current={active ? "page" : undefined}
                   className={`rounded-lg px-4 py-3 text-sm font-semibold transition ${
-                    isActive
+                    active
                       ? "bg-secondary text-primary"
                       : "text-foreground hover:bg-muted"
                   }`}
@@ -183,6 +218,8 @@ export default function Navbar() {
 
             <div className="my-2 border-t border-border" />
 
+            {/* Authentication Links */}
+
             {isPending ? (
               <div className="h-10 animate-pulse rounded-lg bg-muted" />
             ) : isAuthenticated ? (
@@ -191,11 +228,25 @@ export default function Navbar() {
                   {session?.user.name || session?.user.email}
                 </p>
 
+                <Link
+                  href="/profile"
+                  onClick={closeMobileMenu}
+                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition ${
+                    isActive("/profile")
+                      ? "bg-secondary text-primary"
+                      : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <UserRound className="size-5" />
+
+                  Profile Settings
+                </Link>
+
                 <button
                   type="button"
                   onClick={handleLogout}
                   disabled={loggingOut}
-                  className="w-full rounded-lg border border-border px-4 py-3 text-left text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary disabled:opacity-60"
+                  className="w-full rounded-lg border border-border px-4 py-3 text-left text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loggingOut ? "Signing out..." : "Sign out"}
                 </button>

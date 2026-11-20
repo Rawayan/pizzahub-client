@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -11,6 +12,7 @@ import {
   PlusCircle,
   Pizza,
   Store,
+  UserRound,
 } from "lucide-react";
 
 interface VendorDashboardLayoutProps {
@@ -20,10 +22,10 @@ interface VendorDashboardLayoutProps {
 
 const navigationItems = [
   {
-  label: "Subscription",
-  href: "/vendor/subscription",
-  icon: Crown,
-},
+    label: "Overview",
+    href: "/vendor/dashboard",
+    icon: LayoutDashboard,
+  },
   {
     label: "My Menu Items",
     href: "/vendor/menu",
@@ -38,6 +40,16 @@ const navigationItems = [
     label: "Customer Orders",
     href: "/vendor/orders",
     icon: ClipboardList,
+  },
+  {
+    label: "Subscription",
+    href: "/vendor/subscription",
+    icon: Crown,
+  },
+  {
+    label: "Profile Settings",
+    href: "/profile",
+    icon: UserRound,
   },
 ];
 
@@ -55,8 +67,8 @@ export default function VendorDashboardLayout({
     if (href === "/vendor/menu") {
       return (
         pathname === href ||
-        pathname.startsWith("/vendor/menu/") &&
-          !pathname.startsWith("/vendor/menu/new")
+        (pathname.startsWith("/vendor/menu/") &&
+          !pathname.startsWith("/vendor/menu/new"))
       );
     }
 
@@ -64,7 +76,10 @@ export default function VendorDashboardLayout({
       return pathname === href;
     }
 
-    return pathname === href || pathname.startsWith(`${href}/`);
+    return (
+      pathname === href ||
+      pathname.startsWith(`${href}/`)
+    );
   };
 
   return (
@@ -72,6 +87,8 @@ export default function VendorDashboardLayout({
       {/* Sidebar */}
 
       <aside className="z-20 flex w-full shrink-0 flex-col border-b border-border bg-card md:min-h-screen md:w-64 md:border-b-0 md:border-r">
+        {/* Brand */}
+
         <div className="border-b border-border p-5">
           <Link
             href="/"
@@ -93,6 +110,8 @@ export default function VendorDashboardLayout({
           </Link>
         </div>
 
+        {/* Vendor Information */}
+
         <div className="hidden p-5 md:block">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Signed in as
@@ -107,7 +126,12 @@ export default function VendorDashboardLayout({
           </span>
         </div>
 
-        <nav className="flex flex-row gap-2 overflow-x-auto p-3 md:flex-1 md:flex-col md:overflow-visible md:p-4">
+        {/* Navigation */}
+
+        <nav
+          className="flex flex-row gap-2 overflow-x-auto p-3 md:flex-1 md:flex-col md:overflow-visible md:p-4"
+          aria-label="Vendor dashboard navigation"
+        >
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -133,6 +157,8 @@ export default function VendorDashboardLayout({
           })}
         </nav>
 
+        {/* Sidebar Footer */}
+
         <div className="hidden border-t border-border p-4 md:block">
           <Link
             href="/"
@@ -153,15 +179,18 @@ export default function VendorDashboardLayout({
             </div>
 
             <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              Manage your menu and keep track of customer orders.
+              Manage your menu, monitor customer orders,
+              and grow your restaurant with PizzaHub.
             </p>
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
+      {/* Main Content */}
 
       <div className="min-w-0 flex-1">
+        {/* Header */}
+
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/90 px-5 py-3 backdrop-blur sm:px-7">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -182,6 +211,8 @@ export default function VendorDashboardLayout({
             Website
           </Link>
         </header>
+
+        {/* Page Content */}
 
         <main className="min-h-[calc(100vh-65px)]">
           {children}
