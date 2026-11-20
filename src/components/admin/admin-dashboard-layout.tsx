@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 
 import {
   LayoutDashboard,
@@ -12,8 +13,6 @@ import {
   ShieldCheck,
   ArrowLeft,
 } from "lucide-react";
-
-import type { ReactNode } from "react";
 
 const navigation = [
   {
@@ -46,19 +45,20 @@ export default function AdminDashboardLayout({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-[#fffaf5]">
+    <div className="min-h-[calc(100dvh-5rem)] bg-background">
       <div className="mx-auto flex max-w-[1600px] flex-col lg:flex-row">
-        <aside className="w-full shrink-0 border-b border-orange-100 bg-white p-4 lg:min-h-[calc(100vh-5rem)] lg:w-72 lg:border-r lg:border-b-0 lg:p-6">
-          <div className="mb-7 flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-red-600 text-white shadow-sm">
+        <aside className="w-full shrink-0 border-b border-border bg-card p-4 lg:sticky lg:top-20 lg:min-h-[calc(100dvh-5rem)] lg:w-72 lg:self-start lg:border-r lg:border-b-0 lg:p-6">
+          <div className="mb-5 flex items-center gap-3 lg:mb-8">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
               <ShieldCheck className="size-6" />
             </div>
 
-            <div>
-              <h2 className="font-extrabold text-gray-900">
+            <div className="min-w-0">
+              <h2 className="truncate font-extrabold text-card-foreground">
                 PizzaHub Admin
               </h2>
-              <p className="text-xs text-gray-500">
+
+              <p className="text-xs text-muted-foreground">
                 Platform management
               </p>
             </div>
@@ -70,42 +70,50 @@ export default function AdminDashboardLayout({
           >
             {navigation.map((item) => {
               const Icon = item.icon;
-              const active = pathname === item.href;
+
+              const active =
+                pathname === item.href ||
+                pathname.startsWith(`${item.href}/`);
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
+                  aria-current={active ? "page" : undefined}
+                  className={`flex min-w-0 items-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold transition sm:gap-3 ${
                     active
-                      ? "bg-red-50 text-red-700"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-red-700"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
                   <Icon className="size-5 shrink-0" />
-                  <span>{item.label}</span>
+
+                  <span className="truncate">
+                    {item.label}
+                  </span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="mt-7 border-t border-orange-100 pt-5">
+          <div className="mt-5 border-t border-border pt-4">
             <Link
               href="/"
-              className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-gray-600 transition hover:bg-orange-50 hover:text-red-700"
+              className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
-              <ArrowLeft className="size-5" />
+              <ArrowLeft className="size-5 shrink-0" />
               Back to website
             </Link>
           </div>
 
-          <div className="mt-8 hidden rounded-2xl bg-orange-50 p-4 lg:block">
-            <p className="text-sm font-bold text-gray-900">
+          <div className="mt-7 hidden rounded-2xl bg-secondary p-4 lg:block">
+            <p className="text-sm font-bold text-secondary-foreground">
               Administrator access
             </p>
-            <p className="mt-1 text-xs leading-5 text-gray-600">
-              Manage platform users, review menu submissions, and monitor
-              subscription payments.
+
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              Manage platform users, review menu submissions, and
+              monitor subscription payments.
             </p>
           </div>
         </aside>

@@ -83,22 +83,16 @@ export default function VendorDashboardLayout({
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background md:flex-row">
+    <div className="flex min-h-dvh flex-col bg-background md:flex-row">
       {/* Sidebar */}
-
-      <aside className="z-20 flex w-full shrink-0 flex-col border-b border-border bg-card md:min-h-screen md:w-64 md:border-b-0 md:border-r">
-        {/* Brand */}
-
-        <div className="border-b border-border p-5">
-          <Link
-            href="/"
-            className="flex items-center gap-3"
-          >
-            <div className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+      <aside className="z-20 flex w-full shrink-0 flex-col border-b border-border bg-card md:sticky md:top-0 md:h-dvh md:w-64 md:border-r md:border-b-0">
+        <div className="border-b border-border p-4 sm:p-5">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Pizza className="size-6" />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <p className="text-xl font-black tracking-tight text-card-foreground">
                 PizzaHub
               </p>
@@ -110,9 +104,7 @@ export default function VendorDashboardLayout({
           </Link>
         </div>
 
-        {/* Vendor Information */}
-
-        <div className="hidden p-5 md:block">
+        <div className="hidden px-5 py-5 md:block">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Signed in as
           </p>
@@ -121,15 +113,13 @@ export default function VendorDashboardLayout({
             {vendorName}
           </p>
 
-          <span className="mt-2 inline-flex rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700">
+          <span className="mt-2 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
             Vendor Account
           </span>
         </div>
 
-        {/* Navigation */}
-
         <nav
-          className="flex flex-row gap-2 overflow-x-auto p-3 md:flex-1 md:flex-col md:overflow-visible md:p-4"
+          className="flex gap-2 overflow-x-auto overscroll-x-contain px-3 py-3 md:flex-1 md:flex-col md:overflow-x-visible md:overflow-y-auto md:px-4 md:py-4"
           aria-label="Vendor dashboard navigation"
         >
           {navigationItems.map((item) => {
@@ -141,7 +131,7 @@ export default function VendorDashboardLayout({
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition ${
+                className={`flex min-h-11 shrink-0 snap-start items-center gap-2 rounded-xl px-3 py-3 text-sm font-bold transition md:gap-3 md:px-4 ${
                   active
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-secondary hover:text-card-foreground"
@@ -157,15 +147,12 @@ export default function VendorDashboardLayout({
           })}
         </nav>
 
-        {/* Sidebar Footer */}
-
         <div className="hidden border-t border-border p-4 md:block">
           <Link
             href="/"
             className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-muted-foreground transition hover:bg-secondary hover:text-card-foreground"
           >
             <ArrowLeft className="size-4" />
-
             Back to website
           </Link>
 
@@ -179,42 +166,36 @@ export default function VendorDashboardLayout({
             </div>
 
             <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              Manage your menu, monitor customer orders,
-              and grow your restaurant with PizzaHub.
+              Manage your menu, monitor customer orders, and grow
+              your restaurant with PizzaHub.
             </p>
           </div>
         </div>
       </aside>
 
-      {/* Main Content */}
-
+      {/* Main content */}
       <div className="min-w-0 flex-1">
-        {/* Header */}
-
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/90 px-5 py-3 backdrop-blur sm:px-7">
-          <div>
+        <header className="sticky top-0 z-10 flex min-h-16 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur sm:px-7">
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Restaurant workspace
             </p>
 
-            <p className="mt-1 text-sm font-bold text-card-foreground">
+            <p className="mt-1 truncate text-sm font-bold text-card-foreground">
               Welcome, {vendorName}
             </p>
           </div>
 
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-bold text-card-foreground transition hover:bg-secondary md:hidden"
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-bold text-card-foreground transition hover:bg-secondary md:hidden"
           >
             <ArrowLeft className="size-4" />
-
             Website
           </Link>
         </header>
 
-        {/* Page Content */}
-
-        <main className="min-h-[calc(100vh-65px)]">
+        <main className="min-h-[calc(100dvh-4rem)] min-w-0 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
