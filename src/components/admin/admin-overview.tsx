@@ -342,35 +342,35 @@ export default function AdminOverview() {
 
           <div className="mt-7 grid grid-cols-2 gap-4">
             <div className="rounded-xl bg-green-50 p-4">
-              <CheckCircle2 className="size-6 text-green-700" />
-              <p className="mt-3 text-2xl font-extrabold text-gray-900">
+              <CheckCircle2 className="size-6 text-emerald-700" />
+              <p className="mt-3 text-2xl font-extrabold text-slate-900">
                 {statistics.completedTransactions}
               </p>
-              <p className="text-sm text-gray-600">Completed</p>
+              <p className="text-sm text-slate-600">Completed</p>
             </div>
 
             <div className="rounded-xl bg-yellow-50 p-4">
-              <Clock className="size-6 text-yellow-700" />
-              <p className="mt-3 text-2xl font-extrabold text-gray-900">
+              <Clock className="size-6 text-amber-700" />
+              <p className="mt-3 text-2xl font-extrabold text-slate-900">
                 {statistics.pendingTransactions}
               </p>
-              <p className="text-sm text-gray-600">Pending</p>
+              <p className="text-sm text-slate-600">Pending</p>
             </div>
 
             <div className="rounded-xl bg-red-50 p-4">
-              <XCircle className="size-6 text-red-700" />
-              <p className="mt-3 text-2xl font-extrabold text-gray-900">
+              <XCircle className="size-6 text-rose-700" />
+              <p className="mt-3 text-2xl font-extrabold text-slate-900">
                 {statistics.failedTransactions}
               </p>
-              <p className="text-sm text-gray-600">Failed</p>
+              <p className="text-sm text-slate-600">Failed</p>
             </div>
 
             <div className="rounded-xl bg-orange-50 p-4">
-              <ReceiptText className="size-6 text-orange-700" />
-              <p className="mt-3 text-2xl font-extrabold text-gray-900">
+              <ReceiptText className="size-6 text-[#c2410c]" />
+              <p className="mt-3 text-2xl font-extrabold text-slate-900">
                 {statistics.totalTransactions}
               </p>
-              <p className="text-sm text-gray-600">All transactions</p>
+              <p className="text-sm text-slate-600">All transactions</p>
             </div>
           </div>
 

@@ -1,8 +1,10 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
+import { apiFetch } from "@/src/lib/api-client";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -67,6 +69,99 @@ export default function MenuItemDetails({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [deliveryDate, setDeliveryDate] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [message, setMessage] = useState("");
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [orderError, setOrderError] = useState("");
+
+  const router = useRouter();
+
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  /**
+   * Places an order for the currently displayed menu item.
+   */
+  const handlePlaceOrder = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+    setOrderError("");
+
+    if (!deliveryDate || deliveryDate < getTodayDate()) {
+      setOrderError(
+        "Please choose today or a future delivery date."
+      );
+      return;
+    }
+
+    if (deliveryAddress.trim().length < 10) {
+      setOrderError(
+        "Please enter a complete delivery address (at least 10 characters)."
+      );
+      return;
+    }
+
+    try {
+      setPlacingOrder(true);
+
+      const response = await apiFetch("/api/customer/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          itemId,
+          deliveryDate,
+          deliveryAddress: deliveryAddress.trim(),
+          message: message.trim(),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (
+        !response.ok ||
+        !result.success ||
+        !result.data?.order?.id
+      ) {
+        throw new Error(
+          result.message || "Unable to place your order."
+        );
+      }
+
+      toast.success("Order placed", {
+        description:
+          result.message ||
+          "Your order has been placed successfully.",
+      });
+
+      router.push(
+        `/customer/orders/${result.data.order.id}`
+      );
+      router.refresh();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Order placement failed. Please try again.";
+
+      setOrderError(errorMessage);
+      toast.error("Order not placed", {
+        description: errorMessage,
+      });
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
+
+  /**
+   * Fetches the selected menu item.
+   */
   useEffect(() => {
     const controller = new AbortController();
 
@@ -87,9 +182,14 @@ export default function MenuItemDetails({
           }
         );
 
-        const result: MenuItemResponse = await response.json();
+        const result: MenuItemResponse =
+          await response.json();
 
-        if (!response.ok || !result.success || !result.data?.item) {
+        if (
+          !response.ok ||
+          !result.success ||
+          !result.data?.item
+        ) {
           throw new Error(
             result.message || "Unable to load this menu item."
           );
@@ -98,7 +198,10 @@ export default function MenuItemDetails({
         setItem(result.data.item);
         setSelectedImage(0);
       } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") {
+        if (
+          err instanceof Error &&
+          err.name === "AbortError"
+        ) {
           return;
         }
 
@@ -124,8 +227,10 @@ export default function MenuItemDetails({
       <main className="min-h-[70vh] bg-background px-4 py-12 sm:px-6">
         <div className="mx-auto max-w-6xl animate-pulse">
           <div className="mb-8 h-5 w-36 rounded bg-muted" />
+
           <div className="grid gap-10 md:grid-cols-2">
             <div className="aspect-square rounded-3xl bg-muted" />
+
             <div className="space-y-5 py-4">
               <div className="h-6 w-28 rounded bg-muted" />
               <div className="h-10 w-3/4 rounded bg-muted" />
@@ -170,6 +275,7 @@ export default function MenuItemDetails({
 
   const images = item.images?.filter(Boolean) ?? [];
   const activeImage = images[selectedImage];
+
   const isOwnVendorItem =
     viewerRole === "vendor" &&
     Boolean(item.vendor?.id) &&
@@ -283,6 +389,7 @@ export default function MenuItemDetails({
                   <p className="text-sm font-bold text-foreground">
                     Restaurant location
                   </p>
+
                   <p className="mt-1 text-sm text-muted-foreground">
                     {item.location || "Location not provided"}
                   </p>
@@ -298,6 +405,7 @@ export default function MenuItemDetails({
                   <p className="text-sm font-bold text-foreground">
                     Vendor
                   </p>
+
                   <p className="mt-1 text-sm text-muted-foreground">
                     {item.vendor?.businessName ||
                       item.vendor?.name ||
@@ -307,33 +415,140 @@ export default function MenuItemDetails({
               </div>
             </div>
 
+            {/* Customer order form */}
             <div className="mt-8 rounded-2xl border border-border bg-card p-5">
               {canOrder ? (
-                <>
+                <form
+                  onSubmit={handlePlaceOrder}
+                  className="space-y-4"
+                >
                   <div className="flex items-center gap-2 text-foreground">
                     <ShoppingBag className="size-5 text-primary" />
-                    <h2 className="font-bold">Order option</h2>
+
+                    <h2 className="font-bold">
+                      Place your order
+                    </h2>
                   </div>
 
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    You are signed in as a customer. Order placement,
-                    delivery details, and order submission will be
-                    connected in STEP 14 — Customer Dashboard & Orders.
-                  </p>
+                  <div className="flex items-center justify-between rounded-xl bg-secondary/60 px-4 py-3">
+                    <span className="text-sm text-muted-foreground">
+                      Order item
+                    </span>
+
+                    <span className="font-bold text-foreground">
+                      {item.itemName}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-xl bg-secondary/60 px-4 py-3">
+                    <span className="text-sm text-muted-foreground">
+                      Item price
+                    </span>
+
+                    <span className="text-lg font-extrabold text-primary">
+                      {formatPrice(item.price)}
+                    </span>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="delivery-date"
+                      className="mb-2 block text-sm font-semibold text-foreground"
+                    >
+                      Delivery date
+                    </label>
+
+                    <input
+                      id="delivery-date"
+                      type="date"
+                      required
+                      min={getTodayDate()}
+                      value={deliveryDate}
+                      onChange={(event) =>
+                        setDeliveryDate(event.target.value)
+                      }
+                      className="h-12 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="delivery-address"
+                      className="mb-2 block text-sm font-semibold text-foreground"
+                    >
+                      Delivery address
+                    </label>
+
+                    <textarea
+                      id="delivery-address"
+                      required
+                      minLength={10}
+                      maxLength={500}
+                      rows={3}
+                      value={deliveryAddress}
+                      onChange={(event) =>
+                        setDeliveryAddress(event.target.value)
+                      }
+                      placeholder="Enter your full delivery address"
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="order-message"
+                      className="mb-2 block text-sm font-semibold text-foreground"
+                    >
+                      Special instructions{" "}
+                      <span className="font-normal text-muted-foreground">
+                        (optional)
+                      </span>
+                    </label>
+
+                    <textarea
+                      id="order-message"
+                      maxLength={500}
+                      rows={2}
+                      value={message}
+                      onChange={(event) =>
+                        setMessage(event.target.value)
+                      }
+                      placeholder="Any delivery or preparation instructions?"
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                    />
+                  </div>
+
+                  {orderError && (
+                    <p
+                      role="alert"
+                      className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+                    >
+                      {orderError}
+                    </p>
+                  )}
 
                   <button
-                    type="button"
-                    disabled
-                    className="mt-4 w-full cursor-not-allowed rounded-xl bg-primary px-5 py-3.5 font-bold text-primary-foreground opacity-60"
-                    title="Order placement will be implemented in STEP 14"
+                    type="submit"
+                    disabled={placingOrder}
+                    className="w-full rounded-xl bg-primary px-5 py-3.5 font-bold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Order option — coming in STEP 14
+                    {placingOrder
+                      ? "Placing order..."
+                      : "Place Order"}
                   </button>
-                </>
+
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    Your order will be sent to the restaurant for
+                    confirmation. No online payment is collected here.
+                  </p>
+                </form>
               ) : viewerRole === "vendor" ? (
                 <p className="text-sm leading-7 text-muted-foreground">
                   Vendors cannot place customer orders
-                  {isOwnVendorItem ? " for their own menu items" : ""}.
+                  {isOwnVendorItem
+                    ? " for their own menu items"
+                    : ""}
+                  .
                 </p>
               ) : viewerRole === "admin" ? (
                 <p className="text-sm leading-7 text-muted-foreground">
