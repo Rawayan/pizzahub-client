@@ -110,7 +110,7 @@ export default function AdminUsers() {
   }, [search, role, blocked, page]);
 
   useEffect(() => {
-    void loadUsers();
+    queueMicrotask(() => void loadUsers());
   }, [loadUsers]);
 
   const viewUser = async (userId: string) => {

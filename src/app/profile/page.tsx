@@ -54,6 +54,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
 
   const isVendor = profile.role === "vendor";
+  const isAdmin = profile.role === "admin";
 
   useEffect(() => {
     let active = true;
@@ -202,9 +203,11 @@ export default function ProfilePage() {
           href={
             isVendor
               ? "/vendor/dashboard"
-              : profile.role === "customer"
-                ? "/customer/dashboard"
-                : "/"
+              : isAdmin
+                ? "/admin/dashboard"
+                : profile.role === "customer"
+                  ? "/customer/dashboard"
+                  : "/"
           }
           className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition hover:text-primary"
         >
@@ -233,18 +236,18 @@ export default function ProfilePage() {
           <section className="h-fit rounded-2xl border border-border bg-card p-6 shadow-sm">
             <div className="flex flex-col items-center text-center">
               <div className="relative flex size-28 items-center justify-center overflow-hidden rounded-full border-4 border-primary/10 bg-primary/10">
+                <UserRound className="size-12 text-primary" />
+
                 {image.trim() ? (
-                  <img
-                    src={image.trim()}
-                    alt="Profile preview"
-                    className="size-full object-cover"
-                    onError={(event) => {
-                      event.currentTarget.style.display = "none";
+                  <div
+                    role="img"
+                    aria-label="Profile preview"
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${image.trim()})`,
                     }}
                   />
-                ) : (
-                  <UserRound className="size-12 text-primary" />
-                )}
+                ) : null}
               </div>
 
               <h2 className="mt-4 text-xl font-bold text-foreground">

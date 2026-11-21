@@ -29,6 +29,14 @@ export default async function VendorLayout({
   }
 
   if (user.role !== "vendor") {
+    if (user.role === "customer") {
+      redirect("/customer/dashboard");
+    }
+
+    if (user.role === "admin") {
+      redirect("/admin/dashboard");
+    }
+
     redirect("/");
   }
 

@@ -128,7 +128,7 @@ export default function AdminOverview() {
   }, []);
 
   useEffect(() => {
-    void loadDashboard();
+    queueMicrotask(() => void loadDashboard());
   }, [loadDashboard]);
 
   const cards = [

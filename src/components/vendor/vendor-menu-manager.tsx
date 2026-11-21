@@ -63,7 +63,7 @@ export default function VendorMenuManager() {
   }, []);
 
   useEffect(() => {
-    void loadItems();
+    queueMicrotask(() => void loadItems());
   }, [loadItems]);
 
   const changeAvailability = async (item: VendorMenuItem) => {
@@ -161,7 +161,7 @@ export default function VendorMenuManager() {
           </h1>
 
           <p className="mt-2 text-sm text-muted-foreground">
-            Manage your restaurant's menu and availability.
+            Manage your restaurant&apos;s menu and availability.
           </p>
         </div>
 

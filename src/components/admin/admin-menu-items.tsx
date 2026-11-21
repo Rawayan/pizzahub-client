@@ -107,7 +107,7 @@ export default function AdminMenuItems() {
   }, [search, status, page]);
 
   useEffect(() => {
-    void loadItems();
+    queueMicrotask(() => void loadItems());
   }, [loadItems]);
 
   const performAction = async (

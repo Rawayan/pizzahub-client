@@ -105,7 +105,7 @@ export default function AdminTransactions() {
   }, [status, page]);
 
   useEffect(() => {
-    void loadTransactions();
+    queueMicrotask(() => void loadTransactions());
   }, [loadTransactions]);
 
   const formatAmount = (amount: number, currency: string) =>

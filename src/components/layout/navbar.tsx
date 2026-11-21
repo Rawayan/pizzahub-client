@@ -1,17 +1,20 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Menu,
   Pizza,
+  ShieldCheck,
+  Store,
   UserRound,
   X,
 } from "lucide-react";
 
 import { useSession, authClient } from "@/src/lib/auth-client";
+import { apiFetch } from "@/src/lib/api-client";
 import ThemeToggle from "@/src/components/layout/theme-toggle";
 
 const navigationLinks = [
@@ -27,8 +30,65 @@ export default function Navbar() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [profileImage, setProfileImage] = useState<
+    string | null | undefined
+  >(undefined);
+
+  const userId = session?.user?.id;
+
+  useEffect(() => {
+    let active = true;
+
+    queueMicrotask(() => {
+      if (!userId) {
+        setProfileImage(null);
+        return;
+      }
+
+      const loadProfileImage = async () => {
+        try {
+          const response = await apiFetch("/api/users/me");
+
+          if (!response.ok) return;
+
+          const result = (await response.json()) as {
+            success?: boolean;
+            data?: { image?: string | null };
+          };
+
+          if (active && result.success) {
+            setProfileImage(result.data?.image?.trim() || null);
+          }
+        } catch {
+          return;
+        }
+      };
+
+      void loadProfileImage();
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [userId, pathname]);
 
   const isAuthenticated = Boolean(session?.user);
+  const isVendor = session?.user.role === "vendor";
+  const isAdmin = session?.user.role === "admin";
+  const displayName =
+    session?.user.name || session?.user.email || "User";
+  const sessionImage = session?.user.image?.trim() || null;
+  const avatarUrl =
+    profileImage === undefined ? sessionImage : profileImage;
+
+  const avatar = avatarUrl ? (
+    <span
+      className="size-8 shrink-0 rounded-full border border-border bg-muted bg-cover bg-center"
+      role="img"
+      aria-label={`${displayName}'s profile picture`}
+      style={{ backgroundImage: `url("${avatarUrl}")` }}
+    />
+  ) : null;
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
@@ -99,29 +159,57 @@ export default function Navbar() {
         </nav>
 
         {/* Desktop actions */}
-        <div className="hidden items-center gap-3 md:flex">
-          <ThemeToggle />
-
+        <div className="hidden items-center gap-2 md:flex">
           {isPending ? (
             <div
-              className="h-9 w-28 animate-pulse rounded-lg bg-muted"
+              className="h-8 w-24 animate-pulse rounded-lg bg-muted"
               aria-label="Loading account"
             />
           ) : isAuthenticated ? (
             <>
+              {avatar}
+
               <span className="max-w-40 truncate text-sm font-medium text-muted-foreground">
                 {session?.user.name || session?.user.email}
               </span>
 
+              {isVendor ? (
+                <Link
+                  href="/vendor/dashboard"
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
+                    isLinkActive("/vendor/dashboard")
+                      ? "border-primary text-primary"
+                      : "border-border text-foreground hover:border-primary hover:text-primary"
+                  }`}
+                >
+                  <Store className="size-3.5" />
+                  Vendor Dashboard
+                </Link>
+              ) : null}
+
+              {isAdmin ? (
+                <Link
+                  href="/admin/dashboard"
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
+                    isLinkActive("/admin/dashboard")
+                      ? "border-primary text-primary"
+                      : "border-border text-foreground hover:border-primary hover:text-primary"
+                  }`}
+                >
+                  <ShieldCheck className="size-3.5" />
+                  Admin Dashboard
+                </Link>
+              ) : null}
+
               <Link
                 href="/profile"
-                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
                   isLinkActive("/profile")
                     ? "border-primary text-primary"
                     : "border-border text-foreground hover:border-primary hover:text-primary"
                 }`}
               >
-                <UserRound className="size-4" />
+                <UserRound className="size-3.5" />
                 Profile Settings
               </Link>
 
@@ -129,7 +217,7 @@ export default function Navbar() {
                 type="button"
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loggingOut ? "Signing out..." : "Sign out"}
               </button>
@@ -138,25 +226,25 @@ export default function Navbar() {
             <>
               <Link
                 href="/login"
-                className="rounded-lg px-4 py-2 text-sm font-semibold text-foreground transition hover:text-primary"
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-foreground transition hover:text-primary"
               >
                 Sign in
               </Link>
 
               <Link
                 href="/register"
-                className="rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90 hover:shadow-md"
+                className="rounded-lg bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90 hover:shadow-md"
               >
                 Get Started
               </Link>
             </>
           )}
+
+          <ThemeToggle />
         </div>
 
         {/* Mobile actions */}
         <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle />
-
           <button
             type="button"
             onClick={() =>
@@ -175,6 +263,8 @@ export default function Navbar() {
               <Menu className="size-5" />
             )}
           </button>
+
+          <ThemeToggle />
         </div>
       </div>
 
@@ -209,9 +299,43 @@ export default function Navbar() {
               <div className="h-10 animate-pulse rounded-lg bg-muted" />
             ) : isAuthenticated ? (
               <>
-                <p className="truncate px-4 py-2 text-sm text-muted-foreground">
-                  {session?.user.name || session?.user.email}
-                </p>
+                <div className="flex items-center gap-3 px-4 py-2">
+                  {avatar}
+
+                  <p className="truncate text-sm text-muted-foreground">
+                    {session?.user.name || session?.user.email}
+                  </p>
+                </div>
+
+                {isVendor ? (
+                  <Link
+                    href="/vendor/dashboard"
+                    onClick={closeMobileMenu}
+                    className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition ${
+                      isLinkActive("/vendor/dashboard")
+                        ? "bg-secondary text-primary"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <Store className="size-4" />
+                    Vendor Dashboard
+                  </Link>
+                ) : null}
+
+                {isAdmin ? (
+                  <Link
+                    href="/admin/dashboard"
+                    onClick={closeMobileMenu}
+                    className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition ${
+                      isLinkActive("/admin/dashboard")
+                        ? "bg-secondary text-primary"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <ShieldCheck className="size-4" />
+                    Admin Dashboard
+                  </Link>
+                ) : null}
 
                 <Link
                   href="/profile"

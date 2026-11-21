@@ -43,50 +43,29 @@ const navigation = [
   },
 ];
 
-export default function CustomerDashboardLayout({
-  children,
+interface SidebarContentProps {
+  userName: string;
+  userEmail: string;
+  loggingOut: boolean;
+  isActive: (href: string) => boolean;
+  onNavigate: () => void;
+  onLogout: () => void;
+}
+
+function SidebarContent({
   userName,
   userEmail,
-}: CustomerDashboardLayoutProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
-
-  const closeMobile = () => setMobileOpen(false);
-
-  const handleLogout = async () => {
-    try {
-      setLoggingOut(true);
-
-      const { error } = await authClient.signOut();
-
-      if (error) {
-        throw new Error(error.message || "Unable to sign out.");
-      }
-
-      closeMobile();
-      router.push("/login");
-      router.refresh();
-    } catch (error) {
-      console.error("Customer logout failed:", error);
-    } finally {
-      setLoggingOut(false);
-    }
-  };
-
-  const isActive = (href: string) =>
-    pathname === href ||
-    (href !== "/customer/dashboard" &&
-      pathname.startsWith(`${href}/`));
-
-  const SidebarContent = () => (
+  loggingOut,
+  isActive,
+  onNavigate,
+  onLogout,
+}: SidebarContentProps) {
+  return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="border-b border-border px-5 py-5">
         <Link
           href="/"
-          onClick={closeMobile}
+          onClick={onNavigate}
           className="flex items-center gap-2"
         >
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
@@ -137,7 +116,7 @@ export default function CustomerDashboardLayout({
             <Link
               key={item.href}
               href={item.href}
-              onClick={closeMobile}
+              onClick={onNavigate}
               aria-current={active ? "page" : undefined}
               className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
                 active
@@ -155,7 +134,7 @@ export default function CustomerDashboardLayout({
       <div className="space-y-2 border-t border-border p-4">
         <Link
           href="/menu"
-          onClick={closeMobile}
+          onClick={onNavigate}
           className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground"
         >
           <ArrowLeft className="size-5 shrink-0" />
@@ -164,7 +143,7 @@ export default function CustomerDashboardLayout({
 
         <button
           type="button"
-          onClick={handleLogout}
+          onClick={onLogout}
           disabled={loggingOut}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold text-muted-foreground transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-red-950/40"
         >
@@ -174,13 +153,59 @@ export default function CustomerDashboardLayout({
       </div>
     </div>
   );
+}
+
+export default function CustomerDashboardLayout({
+  children,
+  userName,
+  userEmail,
+}: CustomerDashboardLayoutProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const closeMobile = () => setMobileOpen(false);
+
+  const handleLogout = async () => {
+    try {
+      setLoggingOut(true);
+
+      const { error } = await authClient.signOut();
+
+      if (error) {
+        throw new Error(error.message || "Unable to sign out.");
+      }
+
+      closeMobile();
+      router.push("/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Customer logout failed:", error);
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
+  const isActive = (href: string) =>
+    pathname === href ||
+    (href !== "/customer/dashboard" &&
+      pathname.startsWith(`${href}/`));
 
   return (
     <div className="min-h-[calc(100dvh-5rem)] bg-muted/30">
       <div className="mx-auto flex max-w-[1600px]">
         {/* Desktop sidebar */}
         <aside className="sticky top-20 hidden h-[calc(100dvh-5rem)] w-72 shrink-0 flex-col border-r border-border bg-card md:flex">
-          <SidebarContent />
+          <SidebarContent
+            userName={userName}
+            userEmail={userEmail}
+            loggingOut={loggingOut}
+            isActive={isActive}
+            onNavigate={closeMobile}
+            onLogout={() => void handleLogout()}
+          />
         </aside>
 
         <div className="min-w-0 flex-1">
@@ -237,7 +262,14 @@ export default function CustomerDashboardLayout({
                   </button>
                 </div>
 
-                <SidebarContent />
+                <SidebarContent
+                  userName={userName}
+                  userEmail={userEmail}
+                  loggingOut={loggingOut}
+                  isActive={isActive}
+                  onNavigate={closeMobile}
+                  onLogout={() => void handleLogout()}
+                />
               </aside>
             </div>
           )}

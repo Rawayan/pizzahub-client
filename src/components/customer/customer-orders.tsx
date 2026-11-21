@@ -128,7 +128,7 @@ export default function CustomerOrders() {
   }, []);
 
   useEffect(() => {
-    void loadOrders();
+    queueMicrotask(() => void loadOrders());
   }, [loadOrders]);
 
   const filteredOrders = useMemo(() => {
@@ -331,10 +331,13 @@ export default function CustomerOrders() {
                   <div className="flex gap-4">
                     <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-orange-50">
                       {order.item?.images?.[0] ? (
-                        <img
-                          src={order.item.images[0]}
-                          alt={order.item.itemName}
-                          className="size-full object-cover"
+                        <div
+                          role="img"
+                          aria-label={order.item.itemName}
+                          className="size-full rounded-xl bg-cover bg-center"
+                          style={{
+                            backgroundImage: `url(${order.item.images[0]})`,
+                          }}
                         />
                       ) : (
                         <Pizza className="size-9 text-primary/50" />

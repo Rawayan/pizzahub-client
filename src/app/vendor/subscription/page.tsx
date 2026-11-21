@@ -79,7 +79,7 @@ export default function VendorSubscriptionPage() {
   }, []);
 
   useEffect(() => {
-    void loadSubscription();
+    queueMicrotask(() => void loadSubscription());
   }, [loadSubscription]);
 
   const startCheckout = async () => {
@@ -173,7 +173,7 @@ export default function VendorSubscriptionPage() {
           Subscription & Billing
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Manage your restaurant's PizzaHub plan and payment history.
+          Manage your restaurant&apos;s PizzaHub plan and payment history.
         </p>
       </div>
 
@@ -286,7 +286,7 @@ export default function VendorSubscriptionPage() {
           </p>
           <p className="mt-4 text-sm leading-6 text-muted-foreground">
             Your Premium access is activated only after PizzaHub verifies
-            Stripe's payment notification.
+            Stripe&apos;s payment notification.
           </p>
           <Link
             href="/vendor/dashboard"

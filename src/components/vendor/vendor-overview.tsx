@@ -92,7 +92,7 @@ export default function VendorOverview() {
   };
 
   useEffect(() => {
-    void loadDashboard();
+    queueMicrotask(() => void loadDashboard());
   }, []);
 
   if (loading) {

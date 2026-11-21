@@ -216,11 +216,21 @@ function MenuItemCard({ item }: { item: MenuItem }) {
           {item.description || "Discover this delicious menu item."}
         </p>
 
-        <div className="mt-4 flex items-center gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
-          <MapPin className="size-3.5 shrink-0 text-primary" />
-          <span className="truncate">
-            {item.location || "Location available from restaurant"}
-          </span>
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
+          <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+            <MapPin className="size-3.5 shrink-0 text-primary" />
+            <span className="truncate">
+              {item.location || "Location available from restaurant"}
+            </span>
+          </div>
+
+          <Link
+            href={`/menu/${item.id}`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground transition hover:bg-primary/90"
+          >
+            Product Details
+            <ArrowRight className="size-3.5" />
+          </Link>
         </div>
       </div>
     </motion.article>
@@ -294,7 +304,7 @@ export default function HomePage() {
   useEffect(() => {
     const controller = new AbortController();
 
-    void fetchMenuItems(controller.signal);
+    queueMicrotask(() => void fetchMenuItems(controller.signal));
 
     return () => {
       controller.abort();

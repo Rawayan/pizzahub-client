@@ -49,6 +49,12 @@
   --pizza-orange: oklch(0.72 0.17 55);
   --pizza-cream: oklch(0.985 0.012 83);
   --pizza-dark: oklch(0.23 0.025 35);
+
+  --glass-surface: color-mix(in srgb, var(--card) 68%, transparent);
+  --glass-input: color-mix(in srgb, var(--background) 58%, transparent);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-highlight: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 1.25rem 3.5rem -1.75rem rgba(69, 26, 3, 0.35);
 }
 
 /* -----------------------------------------
@@ -90,6 +96,12 @@
   --pizza-orange: oklch(0.75 0.15 60);
   --pizza-cream: oklch(0.21 0.018 35);
   --pizza-dark: oklch(0.96 0.01 75);
+
+  --glass-surface: color-mix(in srgb, var(--card) 58%, transparent);
+  --glass-input: color-mix(in srgb, var(--background) 52%, transparent);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 1.25rem 3.5rem -1.5rem rgba(0, 0, 0, 0.6);
 }
 
 /* -----------------------------------------
@@ -140,13 +152,14 @@
 }
 
 html {
+  background: var(--background);
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
 }
 
 body {
   min-height: 100vh;
-  background: var(--background);
+  background: transparent;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -221,4 +234,201 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+.site-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(48rem 38rem at 8% -8%, rgba(239, 68, 68, 0.22), transparent 65%),
+    radial-gradient(42rem 34rem at 98% 2%, rgba(251, 146, 60, 0.2), transparent 62%),
+    radial-gradient(50rem 40rem at 52% 108%, rgba(244, 63, 94, 0.14), transparent 64%),
+    var(--background);
+}
+
+.site-backdrop::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    radial-gradient(circle at 18% 28%, rgba(239, 68, 68, 0.18), transparent 26rem),
+    radial-gradient(circle at 82% 18%, rgba(251, 146, 60, 0.16), transparent 24rem),
+    radial-gradient(circle at 62% 78%, rgba(244, 63, 94, 0.12), transparent 28rem);
+  filter: blur(28px);
+}
+
+.site-backdrop::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  opacity: 0.28;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.18) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  background-size: 5rem 5rem;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+
+.dark .site-backdrop {
+  background:
+    radial-gradient(48rem 38rem at 8% -8%, rgba(239, 68, 68, 0.28), transparent 65%),
+    radial-gradient(42rem 34rem at 98% 2%, rgba(251, 146, 60, 0.22), transparent 62%),
+    radial-gradient(50rem 40rem at 52% 108%, rgba(244, 63, 94, 0.18), transparent 64%),
+    var(--background);
+}
+
+.site-content {
+  position: relative;
+  z-index: 1;
+}
+
+.glass-panel,
+header,
+footer,
+aside,
+:where([class*="bg-card"], [class*="bg-background"], [class*="bg-white"], [class*="bg-popover"], [class*="bg-secondary"], [class*="bg-muted"]:not([class*="animate-pulse"])) {
+  background-color: var(--glass-surface) !important;
+  border-color: var(--glass-border) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+}
+
+:where(.glass-panel, header, footer, aside, [class*="rounded"], [class*="border"]) {
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+}
+
+input:not([type="hidden"]):not([type="file"]):not([type="radio"]):not([type="checkbox"]),
+select,
+textarea {
+  background-color: var(--glass-input) !important;
+  border-color: var(--glass-border) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+}
+
+button,
+a[class*="bg-primary"],
+a[class*="border"] {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+button:not(:disabled) {
+  box-shadow: 0 0.75rem 1.75rem -1rem rgba(69, 26, 3, 0.45), inset 0 1px 0 var(--glass-highlight);
+}
+
+select option {
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.dark [class*="bg-white"] {
+  color: var(--foreground) !important;
+}
+
+.dark [class*="bg-white"] [class*="text-gray-"],
+.dark [class*="bg-orange-50"] [class*="text-orange-"],
+.dark [class*="bg-amber-50"] [class*="text-amber-"],
+.dark [class*="bg-green-50"] [class*="text-green-"],
+.dark [class*="bg-yellow-50"] [class*="text-yellow-"] {
+  color: var(--foreground) !important;
+}
+
+/* From Uiverse.io by nihad-abbasov - https://uiverse.io/nihad-abbasov/smooth-fly-9
+MIT License, Copyright (c) Galahhad, Galahhad (Galahad), nihad-abbasov (Nihad Abbasov) */
+.pizza-theme-switch {
+  --switch-bg: rgb(135, 150, 165);
+  --switch-width: 48px;
+  --switch-height: 20px;
+  --circle-diameter: 32px;
+  --circle-bg: rgb(232, 89, 15);
+  --circle-inset: calc((var(--circle-diameter) - var(--switch-height)) / 2);
+}
+
+.pizza-theme-switch__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pizza-theme-switch__slider {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  display: block;
+  width: var(--switch-width);
+  height: var(--switch-height);
+  background: var(--switch-bg);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+}
+
+.pizza-theme-switch__input:focus-visible + .pizza-theme-switch__slider {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+.pizza-theme-switch__circle {
+  top: calc(var(--circle-inset) * -1);
+  left: 0;
+  width: var(--circle-diameter);
+  height: var(--circle-diameter);
+  position: absolute;
+  background: var(--circle-bg);
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjAiIHdpZHRoPSIyMCIgdmlld0JveD0iMCAwIDIwIDIwIj4KICAgIDxwYXRoIGZpbGw9IiNmZmYiCiAgICAgICAgZD0iTTkuMzA1IDEuNjY3VjMuNzVoMS4zODlWMS42NjdoLTEuMzl6bS00LjcwNyAxLjk1bC0uOTgyLjk4Mkw1LjA5IDYuMDcybC45ODItLjk4Mi0xLjQ3My0xLjQ3M3ptMTAuODAyIDBMMTMuOTI3IDUuMDlsLjk4Mi45ODIgMS40NzMtMS40NzMtLjk4Mi0uOTgyek0xMCA1LjEzOWE0Ljg3MiA0Ljg3MiAwIDAwLTQuODYyIDQuODZBNC44NzIgNC44NzIgMCAwMDEwIDE0Ljg2MiA0Ljg3MiA0Ljg3MiAwIDAwMTQuODYgMTAgNC44NzIgNC44NzIgMCAwMDEwIDUuMTM5em0wIDEuMzg5QTMuNDYyIDMuNDYyIDAgMDExMy40NzEgMTBhMy40NjIgMy40NjIgMCAwMS0zLjQ3MyAzLjQ3MkEzLjQ2MiAzLjQ2MiAwIDAxNi41MjcgMTAgMy40NjIgMy40NjIgMCAwMTEwIDYuNTI4ek0xLjY2NSA5LjMwNXYxLjM5aDIuMDgzdi0xLjM5SDEuNjY2em0xNC41ODMgMHYxLjM5aDIuMDg0di0xLjM5aC0yLjA4NHpNNS4wOSAxMy45MjhMMy42MTYgMTUuNGwuOTgyLjk4MiAxLjQ3My0xLjQ3My0uOTgyLS45ODJ6bTkuODIgMGwtLjk4Mi45ODIgMS40NzMgMS40NzMuOTgyLS45ODItMS40NzMtMS40NzN6TTkuMzA1IDE2LjI1djIuMDgzaDEuMzg5VjE2LjI1aC0xLjM5eiIgLz4KPC9zdmc+");
+  background-repeat: no-repeat;
+  background-position: center center;
+  -webkit-transition: left 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, -webkit-transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -o-transition: left 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  transition: left 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, -webkit-transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  box-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);
+}
+
+.pizza-theme-switch__circle::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: inherit;
+  -webkit-transition: all 500ms;
+  -o-transition: all 500ms;
+  transition: all 500ms;
+  opacity: 0;
+}
+
+.pizza-theme-switch__input:checked + .pizza-theme-switch__slider .pizza-theme-switch__circle {
+  left: calc(100% - var(--circle-diameter));
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjAiIHdpZHRoPSIyMCIgdmlld0JveD0iMCAwIDIwIDIwIj4KICAgIDxwYXRoIGZpbGw9IiNmZmYiCiAgICAgICAgZD0iTTQuMiAyLjVsLS43IDEuOC0xLjguNyAxLjguNy43IDEuOC42LTEuOEw2LjcgNWwtMS45LS43LS42LTEuOHptMTUgOC4zYTYuNyA2LjcgMCAxMS02LjYtNi42IDUuOCA1LjggMCAwMDYuNiA2LjZ6IiAvPgo8L3N2Zz4=");
+  background-color: rgb(0, 56, 146);
+}
+
+.pizza-theme-switch__input:active + .pizza-theme-switch__slider .pizza-theme-switch__circle::before,
+.pizza-theme-switch__slider:active .pizza-theme-switch__circle::before {
+  -webkit-transition: 0s;
+  -o-transition: 0s;
+  transition: 0s;
+  opacity: 1;
+  width: 0;
+  height: 0;
 }

@@ -1,51 +1,41 @@
-
 "use client";
 
+// From Uiverse.io by nihad-abbasov - https://uiverse.io/nihad-abbasov/smooth-fly-9
+// MIT License, Copyright (c) Galahhad, Galahhad (Galahad), nihad-abbasov (Nihad Abbasov)
+
 import { useEffect, useState } from "react";
-import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 export default function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
-  const nextTheme =
-    theme === "system"
-      ? "dark"
-      : theme === "dark"
-        ? "light"
-        : "system";
-
-  const label =
-    nextTheme === "dark"
-      ? "Switch to dark mode"
-      : nextTheme === "light"
-        ? "Switch to light mode"
-        : "Use system theme";
-
-  const Icon =
-    !mounted || theme === "system"
-      ? Monitor
-      : theme === "dark"
-        ? Moon
-        : Sun;
+  const isDark = mounted && resolvedTheme === "dark";
+  const label = isDark ? "Switch to light mode" : "Switch to dark mode";
+  const accessibleLabel = mounted ? label : "Change color theme";
 
   return (
-    <button
-      type="button"
-      onClick={() => setTheme(nextTheme)}
-      className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-foreground transition hover:border-primary hover:bg-muted"
-      aria-label={mounted ? label : "Change color theme"}
-      title={mounted ? label : "Change color theme"}
+    <label
+      className="pizza-theme-switch shrink-0"
+      title={accessibleLabel}
     >
-      <Icon className="size-5" />
-      <span className="sr-only">
-        {mounted ? label : "Change color theme"}
+      <input
+        id="pizza-theme-switch"
+        className="pizza-theme-switch__input"
+        type="checkbox"
+        role="switch"
+        checked={isDark}
+        onChange={() => setTheme(isDark ? "light" : "dark")}
+        aria-label={accessibleLabel}
+      />
+
+      <span className="pizza-theme-switch__slider" aria-hidden="true">
+        <span className="pizza-theme-switch__circle" />
       </span>
-    </button>
+    </label>
   );
 }

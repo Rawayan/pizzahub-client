@@ -1,5 +1,6 @@
 
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import "./globals.css";
 
@@ -37,14 +38,24 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="flex min-h-screen flex-col antialiased">
+        <div className="site-backdrop" aria-hidden="true" />
+
         <ThemeProvider>
-          <Navbar />
+          <div className="site-content flex flex-1 flex-col">
+            <Suspense
+              fallback={
+                <div className="h-16 border-b border-border bg-card/95 lg:h-20" />
+              }
+            >
+              <Navbar />
+            </Suspense>
 
-          <div className="flex flex-1 flex-col">
-            {children}
+            <div className="flex flex-1 flex-col">
+              {children}
+            </div>
+
+            <Footer />
           </div>
-
-          <Footer />
 
           <Toaster
             position="top-right"

@@ -157,7 +157,7 @@ export default function CustomerOrderDetails({
   }, [orderId]);
 
   useEffect(() => {
-    void loadOrder();
+    queueMicrotask(() => void loadOrder());
   }, [loadOrder]);
 
   const handleCancel = async () => {
@@ -284,10 +284,13 @@ export default function CustomerOrderDetails({
         <div className="flex flex-col gap-5 sm:flex-row">
           <div className="flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-orange-50 dark:bg-orange-950/30 sm:size-44">
             {order.item?.images?.[0] ? (
-              <img
-                src={order.item.images[0]}
-                alt={order.item.itemName}
-                className="size-full object-cover"
+              <div
+                role="img"
+                aria-label={order.item.itemName}
+                className="size-full bg-cover bg-center"
+                style={{
+                  backgroundImage: `url(${order.item.images[0]})`,
+                }}
               />
             ) : (
               <Pizza className="size-14 text-primary/50" />
@@ -385,10 +388,13 @@ export default function CustomerOrderDetails({
           <div className="mt-5 flex items-center gap-3">
             <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-orange-50 text-primary dark:bg-orange-950/30">
               {order.vendor?.image ? (
-                <img
-                  src={order.vendor.image}
-                  alt={order.vendor.businessName}
-                  className="size-full object-cover"
+                <div
+                  role="img"
+                  aria-label={order.vendor.businessName}
+                  className="size-full rounded-xl bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url(${order.vendor.image})`,
+                  }}
                 />
               ) : (
                 <Store className="size-5" />

@@ -440,7 +440,7 @@ export default function VendorOrders() {
   }, []);
 
   useEffect(() => {
-    void fetchOrders();
+    queueMicrotask(() => void fetchOrders());
   }, [fetchOrders]);
 
   // ------------------------------------------

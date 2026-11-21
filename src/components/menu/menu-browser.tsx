@@ -6,7 +6,6 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  LoaderCircle,
   Pizza,
   Search,
   SlidersHorizontal,
