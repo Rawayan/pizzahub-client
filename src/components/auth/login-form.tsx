@@ -16,7 +16,7 @@ export default function LoginForm() {
 
   const getCallbackURL = () => {
     if (typeof window === "undefined") {
-      return "/";
+      return "/dashboard";
     }
 
     const requestedURL = new URLSearchParams(
@@ -32,7 +32,7 @@ export default function LoginForm() {
       return requestedURL;
     }
 
-    return "/";
+    return "/dashboard";
   };
 
   const handleEmailLogin = async (

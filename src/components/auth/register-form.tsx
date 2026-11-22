@@ -50,7 +50,7 @@ export default function RegisterForm() {
         password,
         image: image.trim() || undefined,
         role,
-        callbackURL: "/",
+        callbackURL: "/dashboard",
       });
 
       if (authError) {
@@ -58,7 +58,7 @@ export default function RegisterForm() {
         return;
       }
 
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch (err) {
       console.error("Registration error:", err);
@@ -76,7 +76,7 @@ export default function RegisterForm() {
 
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: "/dashboard",
       });
     } catch (err) {
       console.error("Google sign-up error:", err);

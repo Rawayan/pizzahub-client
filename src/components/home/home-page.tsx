@@ -390,7 +390,7 @@ export default function HomePage() {
             >
               Already have an account?{" "}
               <Link
-                href="/login"
+                href="/login?callbackURL=/dashboard"
                 className="font-semibold text-primary hover:underline"
               >
                 Sign in

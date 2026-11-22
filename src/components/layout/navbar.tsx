@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  LayoutDashboard,
   Menu,
   Pizza,
   ShieldCheck,
@@ -73,6 +74,7 @@ export default function Navbar() {
   }, [userId, pathname]);
 
   const isAuthenticated = Boolean(session?.user);
+  const isCustomer = session?.user.role === "customer";
   const isVendor = session?.user.role === "vendor";
   const isAdmin = session?.user.role === "admin";
   const displayName =
@@ -173,6 +175,20 @@ export default function Navbar() {
                 {session?.user.name || session?.user.email}
               </span>
 
+              {isCustomer ? (
+                <Link
+                  href="/customer/dashboard"
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
+                    isLinkActive("/customer/dashboard")
+                      ? "border-primary text-primary"
+                      : "border-border text-foreground hover:border-primary hover:text-primary"
+                  }`}
+                >
+                  <LayoutDashboard className="size-3.5" />
+                  My Dashboard
+                </Link>
+              ) : null}
+
               {isVendor ? (
                 <Link
                   href="/vendor/dashboard"
@@ -225,7 +241,7 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="/login"
+                href="/login?callbackURL=/dashboard"
                 className="rounded-lg px-3 py-1.5 text-xs font-semibold text-foreground transition hover:text-primary"
               >
                 Sign in
@@ -307,6 +323,21 @@ export default function Navbar() {
                   </p>
                 </div>
 
+                {isCustomer ? (
+                  <Link
+                    href="/customer/dashboard"
+                    onClick={closeMobileMenu}
+                    className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition ${
+                      isLinkActive("/customer/dashboard")
+                        ? "bg-secondary text-primary"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <LayoutDashboard className="size-4" />
+                    My Dashboard
+                  </Link>
+                ) : null}
+
                 {isVendor ? (
                   <Link
                     href="/vendor/dashboard"
@@ -362,7 +393,7 @@ export default function Navbar() {
             ) : (
               <>
                 <Link
-                  href="/login"
+                  href="/login?callbackURL=/dashboard"
                   onClick={closeMobileMenu}
                   className="rounded-lg px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-muted"
                 >
