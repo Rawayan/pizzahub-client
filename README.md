@@ -192,6 +192,45 @@ Make sure the PizzaHub server is running separately.
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run TypeScript type checking |
 
+
+## Implementation Challenges and How They Were Solved
+
+### 1. Connecting the UI to API Query Parameters
+
+The menu browsing experience supports multiple controls through a single API endpoint. The frontend sends the selected search term, category, price range, sorting option, and pagination values as URL query parameters.
+
+Example request:
+
+```http
+GET /api/menu-items?search=pepperoni&category=Classic&minPrice=300&maxPrice=900&sort=price-low&page=1&limit=12
+```
+
+| Query parameter | Purpose |
+|---|---|
+| `search` | Search item names, descriptions, categories, and locations |
+| `category` | Filter by a selected category; `all` leaves the category unrestricted |
+| `minPrice` | Set the minimum price |
+| `maxPrice` | Set the maximum price |
+| `sort` | Choose `newest`, `oldest`, `price-low`, `price-high`, or `name` |
+| `page` | Select the result page |
+| `limit` | Set the number of results per page |
+
+The frontend uses the returned menu items, available categories, and pagination metadata to render the menu and navigation controls. This keeps the displayed results consistent with the server's filtering and sorting logic.
+
+### 2. Handling Role-Based Screens and Protected Actions
+
+The interface is organized around three roles: Customer, Vendor, and Admin. The client uses the authenticated user's role to present the appropriate dashboard and navigation.
+
+For protected operations, the frontend sends the authentication token with API requests. The backend independently verifies authentication, role permissions, and resource ownership. Hiding a button in the interface is not treated as a security boundary.
+
+### 3. Keeping Subscription Results Trustworthy
+
+The vendor subscription interface starts the Stripe Checkout flow and displays the result returned by the backend. It does not grant Premium access based only on a browser redirect.
+
+The backend verifies Stripe webhook signatures and processes subscription events. The frontend then reads the subscription state from the API. This prevents a client-side success page from being treated as proof of payment.
+
+
+
 ## Backend Integration
 
 The frontend communicates with the separate PizzaHub Express API.
